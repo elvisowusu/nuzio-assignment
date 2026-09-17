@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { prisma } from '../db';
 import { NICHES, nicheById, estimateSeconds } from '../domain';
+import { fetchNicheFromRss } from './rss';
 
 export interface IngestedStory {
   externalId: string;
@@ -90,12 +91,26 @@ export async function persistStories(stories: IngestedStory[]): Promise<number> 
 
 /**
  * Refresh the story pool for the given niches.
- * Silently no-ops when GNEWS_API_KEY is unset; seeded stories remain in play.
+ *
+ * Source order, best first:
+ *   1. GNews  - richer summaries and images, needs a key, 100 req/day free
+ *   2. Google News RSS - no key, no cap, headline-level detail
+ *   3. nothing - seeded stories carry the brief
+ *
+ * RSS means live news works out of the box, so a missing key degrades
+ * quality rather than breaking the feed.
  */
 export async function refreshNiches(nicheIds: string[]): Promise<number> {
-  if (!config.gnewsApiKey) return 0;
   const wanted = nicheIds.filter((id) => nicheById(id));
-  const batches = await Promise.all(wanted.map((id) => fetchNicheFromGNews(id)));
+
+  const batches = await Promise.all(
+    wanted.map(async (id) => {
+      const fromApi = await fetchNicheFromGNews(id);
+      if (fromApi.length > 0) return fromApi;
+      return fetchNicheFromRss(id);
+    }),
+  );
+
   return persistStories(batches.flat());
 }
 

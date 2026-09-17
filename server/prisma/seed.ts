@@ -33,8 +33,15 @@ const STORIES = [
   ['sports', 'ESPN', 'India names uncapped spinner for the away Test series.', 'Selectors backed form over experience, handing a first call-up to the leading wicket-taker in this season domestic competition.'],
 ] as const;
 
+/**
+ * Seeded stories are deliberately backdated several days. Live headlines from
+ * RSS/GNews are always newer, so they win the "most recent" ordering and the
+ * seed pool only surfaces when a fetch returns nothing.
+ */
+const SEED_AGE_MS = 4 * 24 * 60 * 60 * 1000;
+
 async function main() {
-  const now = Date.now();
+  const now = Date.now() - SEED_AGE_MS;
 
   for (const [i, [category, source, title, summary]] of STORIES.entries()) {
     const publishedAt = new Date(now - i * 37 * 60 * 1000); // staggered through the morning

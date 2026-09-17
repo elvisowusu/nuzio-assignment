@@ -11,6 +11,8 @@ export const config = {
 /** Which integrations are actually wired up right now. Surfaced at /api/health. */
 export const capabilities = {
   googleAuth: Boolean(config.googleClientId),
-  liveNews: Boolean(config.gnewsApiKey),
+  /** Google News RSS needs no key, so live news is always available. */
+  liveNews: true,
+  newsSource: config.gnewsApiKey ? 'gnews' : 'google-news-rss',
   neuralTts: Boolean(config.elevenLabsApiKey),
 };

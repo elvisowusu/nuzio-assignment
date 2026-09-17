@@ -3,13 +3,19 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Logo } from './Logo';
 import { colors, fonts, radius } from '../lib/theme';
 
-export function BriefHeader({ onSignOut }: { onSignOut: () => void }) {
+export function BriefHeader({
+  onSignOut,
+  onTune,
+}: {
+  onSignOut: () => void;
+  onTune: () => void;
+}) {
   return (
     <View style={styles.row}>
       <Logo size={30} />
       <View style={styles.icons}>
-        <Pressable style={styles.iconBtn} accessibilityLabel="Search">
-          <Ionicons name="search" size={16} color={colors.textDim} />
+        <Pressable style={styles.iconBtn} onPress={onTune} accessibilityLabel="Tune your brief">
+          <Ionicons name="options-outline" size={16} color={colors.violetLight} />
         </Pressable>
         <Pressable style={styles.iconBtn} accessibilityLabel="Notifications">
           <Ionicons name="notifications-outline" size={16} color={colors.textDim} />

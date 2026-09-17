@@ -63,5 +63,12 @@ export async function synthesise(text: string, voiceId: string): Promise<Buffer 
 /** The script the narrator reads for one story. */
 export function narrationScript(index: number, total: number, title: string, summary: string) {
   const trim = (s: string) => s.trim().replace(/[.\s]+$/, '');
-  return `Story ${index + 1} of ${total}. ${trim(title)}. ${trim(summary)}.`;
+  const headline = trim(title);
+  const detail = trim(summary);
+
+  // Headlines from RSS often carry no abstract; narrate the headline alone
+  // rather than reading it back twice.
+  return detail
+    ? `Story ${index + 1} of ${total}. ${headline}. ${detail}.`
+    : `Story ${index + 1} of ${total}. ${headline}.`;
 }

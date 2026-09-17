@@ -31,7 +31,7 @@ cd mobile && pnpm install && pnpm start
 
 Then press `w` for web, `i` for iOS, or `a` for Android — or scan the QR with Expo Go.
 
-It runs with **no API keys at all**: sign in with *Continue as guest*, and narration falls back to on-device speech. Keys upgrade it rather than unblock it.
+It runs with **no API keys at all** — and still serves real, live news. Sign in with *Continue as guest*; headlines come from Google News RSS (no key, no cap) and narration falls back to on-device speech. Keys upgrade quality; they never unblock the app.
 
 ---
 
@@ -45,7 +45,9 @@ Personalisation is not cosmetic — three stored preference signals drive the br
 | `briefMinutes` | how many make the cut |
 | `voiceId` | who narrates |
 
-Stories are **interleaved round-robin across the chosen niches**, so one busy topic can't crowd out the rest of the brief. Switching a user from Technology to Finance visibly rebuilds the running order:
+Stories are **interleaved round-robin across the chosen niches**, so one busy topic can't crowd out the rest of the brief. The tune control in the brief header (⚙) opens a condensed version of onboarding screens 04/05 — change niches, voice or length and the running order rebuilds in place.
+
+Switching a user from Technology to Finance visibly rebuilds the brief:
 
 ```
 niches: markets, indian-biz, global | voice: meera | 15 min
@@ -105,17 +107,27 @@ This is why the app is always demoable: **the fallback is a designed path, not a
 
 ---
 
+## News sources
+
+Headlines resolve through a three-step fallback, best first:
+
+1. **GNews** — richer summaries and images. Needs a key; 100 requests/day free.
+2. **Google News RSS** — no key, no account, no cap. Headline-level detail only, so stories carry no abstract; the card and the narration both adapt rather than echoing the title twice.
+3. **Seeded pool** — 22 backdated stories, so a failed fetch still yields a brief.
+
+Seeds are deliberately timestamped four days back, so any live headline outranks them.
+
 ## Optional keys
 
-Copy `server/.env.example` → `server/.env` and fill in what you have.
+Copy `server/.env.example` → `server/.env` and fill in what you have. All three have free tiers and need no payment method.
 
 | Key | Gets you | Without it |
 |---|---|---|
-| `GNEWS_API_KEY` | live news per niche | 22 seeded stories |
+| `GNEWS_API_KEY` | article summaries and images | live RSS headlines |
 | `ELEVENLABS_API_KEY` | Aria / Kai / Meera voices | on-device speech |
 | `GOOGLE_CLIENT_ID` | real Google sign-in | guest sign-in |
 
-`GET /api/health` reports exactly which are active.
+`GET /api/health` reports exactly which are active, including which news source is in use.
 
 ---
 

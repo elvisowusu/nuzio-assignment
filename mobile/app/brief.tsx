@@ -13,6 +13,7 @@ import {
 import { BriefHeader, FilterChips } from '../components/BriefHeader';
 import { Glow } from '../components/Glow';
 import { NowPlaying } from '../components/NowPlaying';
+import { PreferencesSheet } from '../components/PreferencesSheet';
 import { Screen } from '../components/Screen';
 import { api, type Brief } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -30,7 +31,7 @@ const prettyCategory = (id: string) =>
  * with transport controls, and the rest of today's queue.
  */
 export default function BriefScreen() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, refresh: refreshUser } = useAuth();
 
   const [brief, setBrief] = useState<Brief | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function BriefScreen() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('all');
   const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [tuning, setTuning] = useState(false);
 
   const player = usePlayer(brief);
 
@@ -91,7 +93,19 @@ export default function BriefScreen() {
     <Screen>
       <Glow size={460} color={colors.violet} intensity={0.2} style={styles.glow} />
 
-      <BriefHeader onSignOut={signOut} />
+      <BriefHeader onSignOut={signOut} onTune={() => setTuning(true)} />
+
+      <PreferencesSheet
+        visible={tuning}
+        preference={user.preference}
+        onClose={() => setTuning(false)}
+        onSaved={async () => {
+          setLoading(true);
+          setFilter('all');
+          await refreshUser();
+          await load(true);
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scroll}

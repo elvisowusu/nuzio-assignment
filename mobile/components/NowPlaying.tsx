@@ -50,9 +50,11 @@ export function NowPlaying(p: Props) {
         </Pressable>
       </View>
 
-      <Text style={styles.summary} numberOfLines={3}>
-        {p.story.summary}
-      </Text>
+      {p.story.summary ? (
+        <Text style={styles.summary} numberOfLines={3}>
+          {p.story.summary}
+        </Text>
+      ) : null}
 
       {/* scrubber */}
       <Pressable
