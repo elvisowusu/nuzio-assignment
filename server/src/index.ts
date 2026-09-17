@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { bootstrap } from './bootstrap';
 import { capabilities, config } from './config';
 import { prisma } from './db';
 import { authRouter } from './routes/auth';
@@ -26,9 +27,11 @@ app.use('/api/tts', ttsRouter);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 
-app.listen(config.port, () => {
-  console.log(`\n  Nuzio API  ->  http://localhost:${config.port}`);
+app.listen(config.port, async () => {
+  console.log(`\n  Nuzio API  ->  port ${config.port}`);
   console.log(`  google auth : ${capabilities.googleAuth ? 'live' : 'demo sign-in only'}`);
-  console.log(`  live news   : ${capabilities.liveNews ? 'GNews' : 'seeded stories'}`);
-  console.log(`  narration   : ${capabilities.neuralTts ? 'ElevenLabs' : 'on-device speech'}\n`);
+  console.log(`  news source : ${capabilities.newsSource}`);
+  console.log(`  narration   : ${capabilities.neuralTts ? 'ElevenLabs' : 'on-device speech'}`);
+  await bootstrap();
+  console.log('');
 });

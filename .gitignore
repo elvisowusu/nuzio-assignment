@@ -8,3 +8,5 @@ web-build/
 *.db-journal
 audio-cache/
 .DS_Store
+dist/
+.vercel
