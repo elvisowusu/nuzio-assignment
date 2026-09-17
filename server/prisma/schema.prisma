@@ -1,0 +1,111 @@
+// Nuzio - personalised morning audio news
+// SQLite by default so the project runs with zero setup.
+// For Postgres: set provider = "postgresql" and point DATABASE_URL at your instance.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  googleId   String?  @unique
+  email      String   @unique
+  name       String
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+
+  preference Preference?
+  briefs     Brief[]
+  saved      SavedStory[]
+}
+
+/// Screens 01B/03/04/05/06 - everything that makes a brief "personalised".
+model Preference {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  language      String   @default("en")      // en | hi
+  city          String?
+  profession    String?                       // screen 03
+  niches        String   @default("ai-tech,markets,startups") // csv - screen 04
+  voiceId       String   @default("aria")     // screen 05
+  briefMinutes  Int      @default(5)          // screen 05 (brief length)
+  deliveryTime  String   @default("07:00")    // screen 06
+  speed         Float    @default(1.0)
+  autoAdvance   Boolean  @default(true)
+  onboarded     Boolean  @default(false)
+
+  updatedAt     DateTime @updatedAt
+}
+
+/// A single news item. `category` maps to a niche id.
+model Story {
+  id            String   @id @default(cuid())
+  externalId    String?  @unique
+  title         String
+  summary       String
+  body          String?
+  source        String
+  url           String?
+  imageUrl      String?
+  category      String
+  readMinutes   Int      @default(3)
+  publishedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  items         BriefItem[]
+  saved         SavedStory[]
+
+  @@index([category, publishedAt])
+}
+
+/// Screen 09 - the generated morning brief for one user on one day.
+model Brief {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           String                              // YYYY-MM-DD
+  greeting       String      @default("Good morning")
+  voiceId        String      @default("aria")
+  totalSeconds   Int         @default(0)
+
+  currentIndex   Int         @default(0)
+  positionSec    Int         @default(0)
+  completed      Boolean     @default(false)
+
+  createdAt      DateTime    @default(now())
+  items          BriefItem[]
+
+  @@unique([userId, date])
+}
+
+model BriefItem {
+  id          String  @id @default(cuid())
+  briefId     String
+  brief       Brief   @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  storyId     String
+  story       Story   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  order       Int
+  durationSec Int     @default(180)
+  played      Boolean @default(false)
+
+  @@unique([briefId, storyId])
+  @@index([briefId, order])
+}
+
+model SavedStory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, storyId])
+}

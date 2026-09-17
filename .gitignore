@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.expo/
+web-build/
+*.log
+.env
+*.db
+*.db-journal
+audio-cache/
+.DS_Store

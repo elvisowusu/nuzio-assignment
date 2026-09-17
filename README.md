@@ -1,0 +1,143 @@
+# Nuzio — personalised morning audio news
+
+Assignment build for **Olinp**. Two flows from the Nuzio design system, built end to end:
+
+| Figma screen | Built |
+|---|---|
+| **02 LOGIN** — "Good morning. News on go." | `mobile/app/login.tsx` |
+| **09 MORNING BRIEF** — playing personalised news | `mobile/app/brief.tsx` |
+
+The design is a mobile product (status bars, bottom tabs, swipe), so this is a **real React Native app**. It also exports to web from the same codebase, so it can be reviewed from a link without installing anything.
+
+---
+
+## Run it
+
+Two terminals, from the repo root.
+
+**1 — backend**
+
+```bash
+cd server && pnpm install && pnpm setup && pnpm dev
+```
+
+`pnpm setup` generates the Prisma client, creates the SQLite database and seeds 22 stories. The API comes up on `http://localhost:4000`.
+
+**2 — app**
+
+```bash
+cd mobile && pnpm install && pnpm start
+```
+
+Then press `w` for web, `i` for iOS, or `a` for Android — or scan the QR with Expo Go.
+
+It runs with **no API keys at all**: sign in with *Continue as guest*, and narration falls back to on-device speech. Keys upgrade it rather than unblock it.
+
+---
+
+## What "personalised" actually means here
+
+Personalisation is not cosmetic — three stored preference signals drive the brief:
+
+| Preference | Effect |
+|---|---|
+| `niches` | which stories qualify |
+| `briefMinutes` | how many make the cut |
+| `voiceId` | who narrates |
+
+Stories are **interleaved round-robin across the chosen niches**, so one busy topic can't crowd out the rest of the brief. Switching a user from Technology to Finance visibly rebuilds the running order:
+
+```
+niches: markets, indian-biz, global | voice: meera | 15 min
+
+01 [markets]     Sensex closes at record high as IT stocks rally.
+02 [indian-biz]  Reliance splits retail arm ahead of expected listing.
+03 [global]      Fed minutes hint at a September policy shift.
+04 [markets]     Rupee steadies after RBI intervention in forward markets.
+05 [indian-biz]  GST council moves to simplify rates into three slabs.
+06 [global]      EU agrees framework for critical minerals partnership.
+...
+```
+
+Playback position is persisted server-side, so closing the app and reopening it resumes mid-story.
+
+---
+
+## Architecture
+
+```
+mobile/          Expo SDK 57 · React Native 0.86 · React 19 · Expo Router
+  app/           login (02), brief (09), splash router
+  components/    Glow, Logo, Screen, BriefHeader, NowPlaying
+  lib/           theme tokens, typed API client, auth context, player hook
+
+server/          Node · Express · TypeScript · Prisma · SQLite
+  src/routes/    auth, me, brief, stories, tts
+  src/services/  news (GNews), tts (ElevenLabs), brief (generation)
+```
+
+### API
+
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | status + which integrations are live |
+| `POST` | `/api/auth/google` | verify Google ID token, mint session JWT |
+| `POST` | `/api/auth/demo` | guest sign-in for review without OAuth setup |
+| `GET` | `/api/me` | profile + preferences |
+| `PUT` | `/api/me/preferences` | update niches, voice, length, delivery time |
+| `GET` | `/api/me/options` | niche / profession / voice catalogues |
+| `GET` | `/api/brief/today` | today's personalised brief (`?refresh=true` rebuilds) |
+| `POST` | `/api/brief/:id/progress` | persist playback position |
+| `GET` | `/api/stories` | Discover feed, filterable by niche |
+| `POST` | `/api/stories/:id/save` | toggle saved |
+| `GET` | `/api/tts/story/:id` | narration audio, or a device-speech plan |
+
+### Narration
+
+`GET /api/tts/story/:id` returns one of two things:
+
+- **`200 audio/mpeg`** — neural narration from ElevenLabs, cached to disk so repeat plays never burn quota.
+- **`409 JSON`** — a `device-speech` plan (script + locale/pitch/rate) when no TTS key is set.
+
+The client's `usePlayer` hook drives both behind one interface. Speech synthesis reports no playback position, so progress there runs off a synthetic ticker against the story's estimated duration.
+
+This is why the app is always demoable: **the fallback is a designed path, not a failure mode.**
+
+---
+
+## Optional keys
+
+Copy `server/.env.example` → `server/.env` and fill in what you have.
+
+| Key | Gets you | Without it |
+|---|---|---|
+| `GNEWS_API_KEY` | live news per niche | 22 seeded stories |
+| `ELEVENLABS_API_KEY` | Aria / Kai / Meera voices | on-device speech |
+| `GOOGLE_CLIENT_ID` | real Google sign-in | guest sign-in |
+
+`GET /api/health` reports exactly which are active.
+
+---
+
+## Design fidelity
+
+Tokens were extracted from the Figma rather than eyeballed — `mobile/lib/theme.ts` is the single source of truth.
+
+| Token | Value |
+|---|---|
+| Ink | `#0D0D0D` |
+| Violet → light | `#6A4CF7` → `#9080FF` |
+| Green / cyan | `#3ECF8E` / `#38D9F0` |
+| Text / muted | `#F0EDE8` / `#8A8480` |
+| Surfaces | `rgba(255,255,255,.05–.07)`, hairline `.09–.12` |
+| Display / UI / mono | Instrument Serif · Hanken Grotesk · Geist Mono |
+
+React Native has no radial-gradient primitive, so the ambient glows are built from many thin concentric circles with a quadratic falloff (`components/Glow.tsx`).
+
+---
+
+## Scope
+
+Built: login and the personalised news player, as asked, with the backend behind both.
+
+Not built: onboarding steps 03–08, Discover (10), Settings (11), Billing (12). The backend already serves Discover and preferences, so those screens are UI work on top of live endpoints rather than new plumbing.
