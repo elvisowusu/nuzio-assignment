@@ -2,7 +2,9 @@
 
 ### ▶ Live demo — **https://nuzio-pink.vercel.app**
 
-Tap **Continue as guest** to go straight to the brief. No setup, no keys, real headlines from this morning.
+Tap **Continue as guest** to go straight to the brief. No setup, no keys, real headlines from this morning, narrated by neural voices.
+
+**Android APK** — [download and sideload](https://expo.dev/artifacts/eas/9Bw8zgQuJd9xkYzhBagFSwVAdDgAI-39Ak59Hj5M2Tg.apk) (105 MB) to run the real native app.
 
 API: `https://nuzio-api-production.up.railway.app` · health check: [`/api/health`](https://nuzio-api-production.up.railway.app/api/health)
 
@@ -118,9 +120,13 @@ server/          Node · Express · TypeScript · Prisma · SQLite
 - **`200 audio/mpeg`** — neural narration from ElevenLabs, cached to disk so repeat plays never burn quota.
 - **`409 JSON`** — a `device-speech` plan (script + locale/pitch/rate) when no TTS key is set.
 
-The client's `usePlayer` hook drives both behind one interface. Speech synthesis reports no playback position, so progress there runs off a synthetic ticker against the story's estimated duration.
+The client's `usePlayer` hook drives both behind one interface. Speech synthesis reports no playback position, so progress there runs off a synthetic ticker against the story's estimated duration; the audio engine reports its own.
 
 This is why the app is always demoable: **the fallback is a designed path, not a failure mode.**
+
+Audio URLs are handed to the platform player, which fetches them itself and cannot attach an `Authorization` header — impossible on web, where playback goes through an `<audio>` element. That route therefore also accepts the session token as a query parameter.
+
+**On voice casting:** ElevenLabs gates most of its library behind a paid plan (*"Free users cannot use library voices via the API"*), and the free set contains a single female voice. Aria and Meera therefore share it, separated by delivery settings, and Kai uses a distinct male voice. Repointing `elevenLabsId` in `src/domain.ts` at the exact casting restores it on a paid key — nothing else changes.
 
 ---
 

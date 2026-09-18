@@ -32,11 +32,41 @@ export const PROFESSIONS = [
   { id: 'founder',    label: 'Founder / Builder',  emoji: '\u{1F680}', niches: ['startups', 'ai-tech', 'markets'] },
 ] as const;
 
-/** Voices - screen 05 "Pick a narrator voice". */
+/**
+ * Voices - screen 05 "Pick a narrator voice".
+ *
+ * `elevenLabsId` points at voices reachable on the free API tier. ElevenLabs
+ * gates most of its library behind a paid plan ("Free users cannot use library
+ * voices via the API"), and the free set contains a single female voice, so
+ * Aria and Meera share it and are separated by delivery settings instead.
+ * With a paid key these can be repointed at the exact casting the design calls
+ * for; nothing else needs to change.
+ *
+ * `speechLocale` / `pitch` / `rate` drive on-device speech when no key is set -
+ * en-IN genuinely reads Meera with an Indian accent on most devices.
+ */
 export const VOICES = [
-  { id: 'aria',  name: 'Aria',  initial: 'A', lang: 'en', langLabel: 'English', descriptor: 'Warm · Unhurried · British, ♀', elevenLabsId: '9BWtsMINqrJLrRacOk9x', speechLocale: 'en-GB', pitch: 1.0,  rate: 0.95 },
-  { id: 'kai',   name: 'Kai',   initial: 'K', lang: 'en', langLabel: 'English', descriptor: 'Crisp · Focused · American, ♂',  elevenLabsId: 'TX3LPaxmHKxFdv7VOQHJ', speechLocale: 'en-US', pitch: 0.9,  rate: 1.0  },
-  { id: 'meera', name: 'Meera', initial: 'M', lang: 'hi', langLabel: 'Hindi',   descriptor: 'Bright · Curious · Indian, ♀',   elevenLabsId: 'pFZP5JQG7iQjIQuC4Bku', speechLocale: 'en-IN', pitch: 1.1,  rate: 0.97 },
+  {
+    id: 'aria', name: 'Aria', initial: 'A', lang: 'en', langLabel: 'English',
+    descriptor: 'Warm · Unhurried · British, ♀',
+    elevenLabsId: 'EXAVITQu4vr4xnSDxMaL',
+    ttsSettings: { stability: 0.55, similarity_boost: 0.75, style: 0.0 },
+    speechLocale: 'en-GB', pitch: 1.0, rate: 0.95,
+  },
+  {
+    id: 'kai', name: 'Kai', initial: 'K', lang: 'en', langLabel: 'English',
+    descriptor: 'Crisp · Focused · American, ♂',
+    elevenLabsId: 'pNInz6obpgDQGcFmaJgB',
+    ttsSettings: { stability: 0.65, similarity_boost: 0.8, style: 0.0 },
+    speechLocale: 'en-US', pitch: 0.9, rate: 1.0,
+  },
+  {
+    id: 'meera', name: 'Meera', initial: 'M', lang: 'hi', langLabel: 'Hindi',
+    descriptor: 'Bright · Curious · Indian, ♀',
+    elevenLabsId: 'EXAVITQu4vr4xnSDxMaL',
+    ttsSettings: { stability: 0.35, similarity_boost: 0.7, style: 0.45 },
+    speechLocale: 'en-IN', pitch: 1.1, rate: 0.97,
+  },
 ] as const;
 
 export const voiceById = (id: string) => VOICES.find((v) => v.id === id) ?? VOICES[0];

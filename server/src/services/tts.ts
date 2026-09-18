@@ -39,7 +39,7 @@ export async function synthesise(text: string, voiceId: string): Promise<Buffer 
         body: JSON.stringify({
           text,
           model_id: 'eleven_turbo_v2_5',
-          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+          voice_settings: voice.ttsSettings,
         }),
         signal: AbortSignal.timeout(30000),
       },
