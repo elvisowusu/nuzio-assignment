@@ -40,5 +40,8 @@
     "react-native-screens": "~4.26.2",
     "react-native-web": "^0.21.2",
     "typescript": "~6.0.3"
+  },
+  "devDependencies": {
+    "eas-cli": "^24.7.0"
   }
 }

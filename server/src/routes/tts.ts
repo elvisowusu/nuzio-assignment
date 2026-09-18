@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { prisma } from '../db';
 import { voiceById } from '../domain';
 import { capabilities } from '../config';
-import { requireAuth, type AuthedRequest } from '../middleware/auth';
+import { requireAuthAllowingQueryToken, type AuthedRequest } from '../middleware/auth';
 import { narrationScript, synthesise } from '../services/tts';
 
 export const ttsRouter = Router();
-ttsRouter.use(requireAuth);
+// Audio URLs are loaded by the platform player, so this route also accepts
+// the session token as a query parameter.
+ttsRouter.use(requireAuthAllowingQueryToken);
 
 /**
  * Narration audio for one story in a brief.

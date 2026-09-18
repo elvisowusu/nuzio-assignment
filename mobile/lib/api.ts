@@ -108,12 +108,19 @@ export const api = {
   narration: async (storyId: string, index: number, total: number, voiceId: string):
     Promise<{ kind: 'audio'; url: string } | { kind: 'speech'; plan: DeviceSpeechPlan }> => {
     const token = await getToken();
-    const url = `${BASE}/api/tts/story/${storyId}?index=${index}&total=${total}&voice=${voiceId}`;
+    const query = `index=${index}&total=${total}&voice=${encodeURIComponent(voiceId)}`;
+    const url = `${BASE}/api/tts/story/${storyId}?${query}`;
     const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
 
     if (res.status === 409) return { kind: 'speech', plan: (await res.json()) as DeviceSpeechPlan };
     if (!res.ok) throw new ApiError('Narration unavailable', res.status);
-    return { kind: 'audio', url };
+
+    // The audio element/player fetches this URL itself and cannot attach an
+    // Authorization header, so the session token rides in the query string.
+    return {
+      kind: 'audio',
+      url: token ? `${url}&token=${encodeURIComponent(token)}` : url,
+    };
   },
 
   discover: (category = 'all', q = '') =>

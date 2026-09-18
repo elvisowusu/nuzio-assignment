@@ -8,13 +8,40 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0D0D0D",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": false, "bundleIdentifier": "app.nuzio.client" },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.nuzio.client"
+    },
     "android": {
       "package": "app.nuzio.client",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
-    "web": { "bundler": "metro", "output": "single" },
-    "plugins": ["expo-router", "expo-web-browser", "expo-secure-store", "expo-audio", "expo-font"],
-    "experiments": { "typedRoutes": false }
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-audio",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7f473572-83fb-45ff-8d53-e925b9e386ff"
+      }
+    },
+    "owner": "elvisgyasiowusu"
   }
 }
