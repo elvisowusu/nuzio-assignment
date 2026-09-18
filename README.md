@@ -1,5 +1,13 @@
 # Nuzio — personalised morning audio news
 
+### ▶ Live demo — **https://nuzio-pink.vercel.app**
+
+Tap **Continue as guest** to go straight to the brief. No setup, no keys, real headlines from this morning.
+
+API: `https://nuzio-api-production.up.railway.app` · health check: [`/api/health`](https://nuzio-api-production.up.railway.app/api/health)
+
+---
+
 Assignment build for **Olinp**. Two flows from the Nuzio design system, built end to end:
 
 | Figma screen | Built |
@@ -64,6 +72,15 @@ niches: markets, indian-biz, global | voice: meera | 15 min
 Playback position is persisted server-side, so closing the app and reopening it resumes mid-story.
 
 ---
+
+## Deployment
+
+| Piece | Host | Notes |
+|---|---|---|
+| Web app | Vercel | Expo web export, SPA rewrites, immutable asset caching |
+| API + Postgres | Railway | `pnpm build` generates the Postgres client; `pnpm start` pushes the schema then boots |
+
+The same codebase also runs natively — `pnpm start` in `mobile/` and press `i`/`a`, or scan the QR with Expo Go.
 
 ## Architecture
 
