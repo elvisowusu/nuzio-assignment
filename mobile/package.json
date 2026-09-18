@@ -43,5 +43,6 @@
   },
   "devDependencies": {
     "eas-cli": "^24.7.0"
-  }
+  },
+  "packageManager": "pnpm@10.33.0"
 }

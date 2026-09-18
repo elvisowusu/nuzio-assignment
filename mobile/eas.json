@@ -11,7 +11,9 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://nuzio-api-production.up.railway.app"
-      }
+      },
+      "node": "22.14.0",
+      "corepack": true
     },
     "production": {
       "autoIncrement": true,
@@ -20,7 +22,9 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://nuzio-api-production.up.railway.app"
-      }
+      },
+      "node": "22.14.0",
+      "corepack": true
     }
   },
   "submit": {
